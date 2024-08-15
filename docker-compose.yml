@@ -1,0 +1,45 @@
+networks:
+  amnezia-dns-net:
+    ipam:
+      config:
+        - subnet: 172.29.172.0/24
+      options:
+        com.docker.network.bridge.name: amn0
+
+services:
+  amnezia-awg:
+    image: amnezia-awg
+    container_name: amnezia-awg
+    build:
+      context: server_scripts/awg
+      dockerfile: Dockerfile
+    networks:
+      - amnezia-dns-net
+    volumes:
+      - /lib/modules:/lib/modules
+      - ./server_scripts/awg/:/opt/amnezia/
+    restart: always
+    devices:
+    - /dev/net/tun:/dev/net/tun
+    cap_add:
+      - NET_ADMIN
+      - SYS_MODULE
+    sysctls:
+      net.ipv4.conf.all.src_valid_mark: 1
+    ports:
+      - "51820:51820/udp"
+    environment:
+      WIREGUARD_SUBNET_IP: 10.8.1.0
+      WIREGUARD_SUBNET_CIDR: 24
+      AWG_SERVER_PORT: 51820
+      JUNK_PACKET_COUNT: 3
+      JUNK_PACKET_MIN_SIZE: 10
+      JUNK_PACKET_MAX_SIZE: 30
+      INIT_PACKET_JUNK_SIZE: 15
+      RESPONSE_PACKET_JUNK_SIZE: 18
+      INIT_PACKET_MAGIC_HEADER: 1020325451
+      RESPONSE_PACKET_MAGIC_HEADER: 3288052141
+      UNDERLOAD_PACKET_MAGIC_HEADER: 1766607858
+      TRANSPORT_PACKET_MAGIC_HEADER: 2528465083
+    entrypoint: /bin/bash
+    command: -c  "./opt/amnezia/configure_container.sh && dumb-init /opt/amnezia/start.sh"
