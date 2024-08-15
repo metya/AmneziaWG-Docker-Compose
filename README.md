@@ -15,4 +15,4 @@ When you add your server to AmneziaWG app you need to be able to run `sudo` from
 sudo visudo
 ```
 
-Add `$user ALL=(ALL) NOPASSWD:ALL` line to that file, where $user is the name of your user and save.
+Add `$user ALL=(ALL) NOPASSWD:ALL` line to that file, where `$user` is the name of your user, and save.
